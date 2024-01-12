@@ -4,9 +4,12 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from drf_yasg.utils import swagger_auto_schema
+from django.contrib.auth.models import Group
 
-from user.serializers import UserSerializer
-from rest_framework.permissions import AllowAny
+from user.serializers import UserSerializer, GroupSerializer
+from rest_framework.permissions import AllowAny,IsAdminUser
+from user.models import User
+from django.contrib.auth.hashers import make_password
 # Create your views here.
 
 @api_view(['POST'])
@@ -23,3 +26,38 @@ def login(request):
         return Response(token.key)
     else:
         return Response("Invalid Credentials")
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    user = authenticate(username=email,password=password)
+
+    if user != None:
+        token,_ = Token.objects.get_or_create(user=user)
+        return Response(token.key)
+    else:
+        return Response('Invalid credentials!')
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def owner_create(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    group = Group.objects.get(name='Owner')
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        hash_password = make_password(password)
+        a = User.objects.create(email=email,password=hash_password)
+        a.groups.add(group)
+        return Response('User created!')
+    else:
+        return Response(serializer.errors)
+
+@api_view(['GET'])
+def group_list(request):
+    group_objs = Group.objects.all()
+    serializer = GroupSerializer(group_objs,many=True)
+    return Response(serializer.data)
