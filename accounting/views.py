@@ -2,8 +2,10 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from accounting.models import Bill, Payment
 from rest_framework.response import Response
+from rest_framework.permissions import DjangoModelPermissions
 from accounting.serializers import BillSerializer, PaymentSerializer
 from rest_framework.viewsets import ModelViewSet
+from core.premission import CustomPremission
 # Create your views here.
 # @api_view(['GET'])
 # def bill_view(request):
@@ -14,6 +16,7 @@ from rest_framework.viewsets import ModelViewSet
 class BillView(ModelViewSet):
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
+    permission_classes = [CustomPremission]
 
     def list(self, request):
         querryset = self.get_queryset()
