@@ -28,20 +28,6 @@ def login(request):
         return Response("Invalid Credentials")
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
-def login(request):
-    email = request.data.get('email')
-    password = request.data.get('password')
-
-    user = authenticate(username=email,password=password)
-
-    if user != None:
-        token,_ = Token.objects.get_or_create(user=user)
-        return Response(token.key)
-    else:
-        return Response('Invalid credentials!')
-
-@api_view(['POST'])
 @permission_classes([IsAdminUser])
 def owner_create(request):
     email = request.data.get('email')
@@ -55,6 +41,7 @@ def owner_create(request):
         return Response('User created!')
     else:
         return Response(serializer.errors)
+
 
 @api_view(['GET'])
 def group_list(request):
