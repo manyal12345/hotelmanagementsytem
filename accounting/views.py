@@ -6,6 +6,8 @@ from rest_framework.permissions import DjangoModelPermissions
 from accounting.serializers import BillSerializer, PaymentSerializer
 from rest_framework.viewsets import ModelViewSet
 from core.premission import CustomPremission
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 # Create your views here.
 # @api_view(['GET'])
 # def bill_view(request):
@@ -17,10 +19,14 @@ class BillView(ModelViewSet):
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
     permission_classes = [CustomPremission]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['guest']
+    search_fields = ['amount']
 
     def list(self, request):
         querryset = self.get_queryset()
-        serializer = self.serializer_class(querryset, many=True)
+        filter_querryset = self.filter_queryset(querryset)
+        serializer = self.serializer_class(filter_querryset, many=True)
         return Response(serializer.data)
 
     def create(self, request):

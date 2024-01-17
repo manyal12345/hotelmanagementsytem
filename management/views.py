@@ -6,12 +6,15 @@ from user.models import User
 from user.serializers import UserSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
 
 # Create your views here.
 
 class EnmloyeeInfoView(ModelViewSet):
     queryset = EmployeeInfo.objects.all()
     serializer_class = EmployeeInfoSerializer
+    filter_backends = [SearchFilter]
+    search_fields =  ['name', 'number']
 
     def create(self, request):
         email = request.data.get('email')
